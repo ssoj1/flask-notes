@@ -26,7 +26,6 @@ class User(db.Model):
                             )
     password = db.Column(db.String(100), 
                             nullable=False
-                            # db.CheckConstraint('len(password) > 7') 
                             )
     email = db.Column(db.String(50), 
                             nullable=False,
@@ -41,15 +40,20 @@ class User(db.Model):
 
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
-        """Register a user with hashed password & return user"""
+        """Register a user with hashed password, add to the session & 
+        return user"""
 
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
 
-        return cls(username=username, 
+        new_user = cls(username=username, 
                         password=hashed, 
                         email=email, 
                         first_name=first_name, 
                         last_name=last_name)
+
+        db.session.add(new_user)
+
+        return new_user
     
     @classmethod
     def authenticate_user(cls, username, password):
@@ -57,7 +61,7 @@ class User(db.Model):
             Return user if valid and false if not.
         """
     
-        user = cls.query.filter_by(username=username).one_or_none()
+        user = cls.query.get_or_404(username)
 
         if user and bcrypt.check_password_hash(user.password, password):
             return user
@@ -78,4 +82,4 @@ class Note(db.Model):
     owner = db.Column(db.Text,
                     db.ForeignKey("users.username"))
 
-    users = db.relationship("User", backref="notes")
+    user = db.relationship("User", backref="notes")

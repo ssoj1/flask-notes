@@ -1,7 +1,6 @@
 """Flask app for Notes"""
 
 from flask import Flask, jsonify, request, render_template, redirect, session, flash
-from flask.templating import render_template_string
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, db, connect_db
 from forms import RegisterForm, LogInForm, LogOutForm
@@ -9,8 +8,10 @@ import os
 
 app = Flask(__name__)
 
-API_SECRET_KEY=os.environ['API_SECRET_KEY']
-app.config['SECRET_KEY'] = API_SECRET_KEY
+SECRET_KEY=os.environ['SECRET_KEY'] 
+app.config['SECRET_KEY'] = SECRET_KEY #needed for debug toolbar and session
+
+toolbar = DebugToolbarExtension(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///notes"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -39,12 +40,12 @@ def register_user():
         last_name = form.last_name.data
 
         new_user = User.register(username, password, email, first_name, last_name)
-        db.session.add(new_user)
         db.session.commit()
+        flash("User successfully created")
 
-        session["username"] = username
+        session["username"] = new_user.username
 
-        return redirect(f"/users/{username}")
+        return redirect(f"/users/{new_user.username}")
     
     else: 
 
@@ -63,9 +64,11 @@ def log_in_user():
         user = User.authenticate_user(username, password)
 
         if user:
-            session["username"] = username
-            return redirect(f"/users/{username}")
-        
+            session["username"] = user.username
+            flash("Successfully logged in")
+
+            return redirect(f"/users/{user.username}")
+
         else:
             form.username.errors = ["Bad name/password"]
     
@@ -85,7 +88,7 @@ def display_user_details(username):
 
         form = LogOutForm()
 
-        if session["username"] == username:
+        if session["username"] == user.username:
             return render_template("user_detail.html", user=user, form=form)
         else: 
             flash("You're not authorized to view that page")
@@ -101,9 +104,6 @@ def log_out_user():
 
     if form.validate_on_submit():
         session.pop("username", None)
+        flash("Successfully logged out")
 
-        return redirect("/")
-
-    else:
-        session_user = session["username"]
-        return redirect(f"/users/{session_user}")
+    return redirect("/")

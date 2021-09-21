@@ -9,6 +9,21 @@
     <div>Username: {{ user.username }}</div>
     <div>Email: {{ user.email }}</div>
 
+    <h2>Notes</h2>
+
+    <div class+"note-section">
+    {% for note in user.notes %}
+
+        <div>
+            <a href="/notes/{{ note.id }}/update"><i class=“far fa-edit”></i></a>
+            <a href="/notes/{{ note.id }}/delete"><i class=“far fa-trash-alt”></i></a>
+            <b>{{ note.title }} </b>
+            <div> {{ note.content }}</div>
+        </div>
+
+    {% endfor %}
+    </div>
+
 </div>
 
 <form action="/logout" method="POST" id="log-out" >
@@ -33,6 +48,27 @@
     </button>
 </form>
 
+<form action="/users/{{ user.username }}/delete" method="POST" id="delete" >
+    {{ form.hidden_tag() }}
+    <!--add type=hidden form fields -->
+
+    {% for field in form
+    if field.widget.input_type != 'hidden' %}
+
+    <!-- <p>
+        {{ field.label }}
+        {{ field }}
+
+        {% for error in field.errors %}
+        {{ error }}
+        {% endfor %}
+    </p> -->
+
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">
+        Delete User
+    </button>
+</form>
 
 
 
