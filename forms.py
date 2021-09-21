@@ -41,3 +41,7 @@ class LogInForm(FlaskForm):
                             validators=[DataRequired(), 
                             Length(max=100)
                             ])
+
+class LogOutForm(FlaskForm):
+    """ Logs out an existing user """
+

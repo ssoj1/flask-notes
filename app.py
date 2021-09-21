@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, render_template, redirect, session, f
 from flask.templating import render_template_string
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, db, connect_db
-from forms import RegisterForm, LogInForm
+from forms import RegisterForm, LogInForm, LogOutForm
 import os
 
 app = Flask(__name__)
@@ -83,11 +83,27 @@ def display_user_details(username):
     else: 
         user = User.query.get_or_404(username)
 
+        form = LogOutForm()
+
         if session["username"] == username:
-            return render_template("user_detail.html", user=user)
+            return render_template("user_detail.html", user=user, form=form)
         else: 
             flash("You're not authorized to view that page")
             session_user = session["username"]
 
             return redirect(f"/users/{session_user}")
 
+@app.post("/logout")
+def log_out_user():
+    """ Clears out information from the session and redirects to /"""
+
+    form = LogOutForm()
+
+    if form.validate_on_submit():
+        session.pop("username", None)
+
+        return redirect("/")
+
+    else:
+        session_user = session["username"]
+        return redirect(f"/users/{session_user}")
