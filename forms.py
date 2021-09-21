@@ -29,3 +29,15 @@ class RegisterForm(FlaskForm):
                             validators=[InputRequired(), 
                             Length(max=30)
                             ])
+
+class LogInForm(FlaskForm):
+    """ Logs in an existing user """
+
+    username = StringField("Username", 
+                            validators=[InputRequired(), 
+                            Length(max=20)
+                            ])
+    password = PasswordField("Password", 
+                            validators=[DataRequired(), 
+                            Length(max=100)
+                            ])

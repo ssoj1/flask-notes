@@ -3,13 +3,15 @@
 from flask import Flask, jsonify, request, render_template, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, db, connect_db
+from forms import RegisterForm, LogInForm
 import os
 
 app = Flask(__name__)
 
 API_SECRET_KEY=os.environ['API_SECRET_KEY']
+app.config['SECRET_KEY'] = API_SECRET_KEY
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///users"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///notes"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -22,11 +24,11 @@ def redirect_to_register():
 
     return redirect("/register")
 
-@app.route("/register", method=["GET" , "POST"])
+@app.route("/register", methods=["GET" , "POST"])
 def register_user():
-    """ """
+    """ Register user: produce form & handle form submission. """
 
-    form = User()
+    form = RegisterForm()
 
     if form.validate_on_submit():
         username = form.username.data
@@ -45,5 +47,27 @@ def register_user():
     
     else: 
 
-        return render_template("register_form.html")
+        return render_template("register_form.html", form=form)
+
+@app.route("/login", methods=["GET", "POST"])
+def log_in_user():
+    """ Produce login form and handle login"""
+
+    form = LogInForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+
+        user = User.authenticate_user(username, password)
+
+        if user:
+            session["username"] = username
+            return redirect("/secret")
+        
+        else:
+            form.username.errors = ["Bad name/password"]
+    
+    return render_template("login_form.html", form=form)
+
 
