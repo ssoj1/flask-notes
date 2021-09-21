@@ -1,9 +1,9 @@
 """Forms for List app."""
 
 from wtforms.fields.simple import PasswordField
-from wtforms.validators import InputRequired, Optional, Email, Length, DataRequired
+from wtforms.validators import InputRequired, Email, Length, DataRequired
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, TextAreaField, BooleanField
+from wtforms import StringField, SelectField, TextAreaField, BooleanField, HiddenField
 
 class RegisterForm(FlaskForm):
     """Register a new user"""
@@ -45,3 +45,20 @@ class LogInForm(FlaskForm):
 class LogOutForm(FlaskForm):
     """ Logs out an existing user """
 
+class DeleteUserForm(FlaskForm):
+    """ Deletes a user from the database """
+
+class AddNote(FlaskForm):
+    """ Creates a new note """
+
+    title = StringField("Title",
+                        validators=[InputRequired(),
+                        Length(max=100)
+                        ])
+    content = StringField("Content",
+                        validators=[InputRequired()
+                        ])
+    owner = HiddenField("Username",
+                        validators=[InputRequired(),
+                        Length(max=20)
+                        ])

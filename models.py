@@ -38,6 +38,10 @@ class User(db.Model):
                             nullable=False
                             )
 
+    notes = db.relationship("Note", 
+                            backref="user",
+                            cascade="all, delete-orphan")
+
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
         """Register a user with hashed password, add to the session & 
@@ -72,6 +76,8 @@ class User(db.Model):
 class Note(db.Model):
     """ Notes"""
 
+    __tablename__ = "notes"
+
     id = db.Column(db.Integer,
                     primary_key=True,
                     autoincrement=True)
@@ -82,4 +88,3 @@ class Note(db.Model):
     owner = db.Column(db.Text,
                     db.ForeignKey("users.username"))
 
-    user = db.relationship("User", backref="notes")

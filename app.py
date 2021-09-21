@@ -2,8 +2,8 @@
 
 from flask import Flask, jsonify, request, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
-from models import User, db, connect_db
-from forms import RegisterForm, LogInForm, LogOutForm
+from models import User, Note, db, connect_db
+from forms import RegisterForm, LogInForm, LogOutForm, DeleteUserForm, AddNote
 import os
 
 app = Flask(__name__)
@@ -89,6 +89,7 @@ def display_user_details(username):
         form = LogOutForm()
 
         if session["username"] == user.username:
+            # breakpoint()
             return render_template("user_detail.html", user=user, form=form)
         else: 
             flash("You're not authorized to view that page")
@@ -107,3 +108,48 @@ def log_out_user():
         flash("Successfully logged out")
 
     return redirect("/")
+
+@app.post("/users/<username>/delete")
+def delete_user_and_notes(username):
+    """ Remove the user from the database and also removes all of their notes 
+        Clears any user information from the session and redirects to /
+    """
+
+    form = DeleteUserForm()
+
+    if form.validate_on_submit():
+        user = User.query.get_or_404(username)
+
+        db.session.delete(user)
+        db.session.commit()
+
+        session.pop("username", None)
+        flash("Successfully deleted user")
+
+        return redirect("/")
+    
+    return redirect("/")
+
+@app.route("/users/<username>/notes/add", methods=["GET", "POST"])
+def add_note(username):
+    """ Displays a form to add notes and adds a new note
+        After adding a new note, redirects to users/<username>
+    """
+    user = User.query.get_or_404(username)
+    form = AddNote(owner=user.username)
+    # obj=user
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        owner = form.owner.data
+
+        new_note = Note(title=title, content=content, owner=owner)
+        db.session.add(new_note)
+        db.session.commit()
+
+        flash("Successfully added new note")
+        return redirect (f"/users/{user.username}")
+
+
+    return render_template("add_note_form.html", form=form)
