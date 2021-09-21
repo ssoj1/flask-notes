@@ -1,6 +1,6 @@
 """Flask app for Notes"""
 
-from flask import Flask, jsonify, request, render_template, redirect
+from flask import Flask, jsonify, request, render_template, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, db, connect_db
 import os
@@ -35,15 +35,15 @@ def register_user():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        new_user = User(username=username, 
-                        password=password, 
-                        email=email, 
-                        first_name=first_name, 
-                        last_name=last_name)
+        new_user = User.register(username, password, email, first_name, last_name)
+        db.session.add(new_user)
+        db.session.commit()
 
-                        # dont forget to hash password!
+        session["username"] = username
 
+        return redirect("/secret")
+    
+    else: 
 
-
-    return render_template("register_form.html")
+        return render_template("register_form.html")
 
