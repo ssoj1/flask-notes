@@ -1,6 +1,7 @@
 """Flask app for Notes"""
 
-from flask import Flask, jsonify, request, render_template, redirect, session
+from flask import Flask, jsonify, request, render_template, redirect, session, flash
+from flask.templating import render_template_string
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, db, connect_db
 from forms import RegisterForm, LogInForm
@@ -43,7 +44,7 @@ def register_user():
 
         session["username"] = username
 
-        return redirect("/secret")
+        return redirect(f"/users/{username}")
     
     else: 
 
@@ -63,11 +64,30 @@ def log_in_user():
 
         if user:
             session["username"] = username
-            return redirect("/secret")
+            return redirect(f"/users/{username}")
         
         else:
             form.username.errors = ["Bad name/password"]
     
     return render_template("login_form.html", form=form)
 
+@app.get("/users/<username>")
+def display_user_details(username):
+    """ Displays user details if a user is logged in, otherwise
+    redirects to login form"""
+
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/login")
+
+    else: 
+        user = User.query.get_or_404(username)
+
+        if session["username"] == username:
+            return render_template("user_detail.html", user=user)
+        else: 
+            flash("You're not authorized to view that page")
+            session_user = session["username"]
+
+            return redirect(f"/users/{session_user}")
 
