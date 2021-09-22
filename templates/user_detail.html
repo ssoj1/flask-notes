@@ -12,24 +12,34 @@
     <h3>Notes</h3>
 
     <div class="note-section">
-    {% if user.notes %}
+        {% if user.notes %}
         {% for note in user.notes %}
 
-            <div>
-                <a href="/notes/{{ note.id }}/update" method="POST"><i class="far fa-edit"></i></a>
-                <a href="/notes/{{ note.id }}/delete" method="POST"><i class="far fa-trash-alt"></i></a>
-                <b>{{ note.title }} </b>
-                <div> {{ note.content }}</div>
-            </div>
+        <div class="row">
+            <form action="/notes/{{ note.id }}/update" method="POST" class="col-1">
+                <button class="far fa-edit"></button>
+            </form>
+            <form action="/notes/{{ note.id }}/delete" method="POST" id="delete-note" class="col-1">
+                {{ delete_note_form.hidden_tag() }}
+            
+                {% for field in delete_note_form
+                if field.widget.input_type != 'hidden' %}
+            
+                {% endfor %}
+                <button class="far fa-trash-alt"></button>
+            </form>
+            <div><b>{{ note.title }} </b> <i>{{ note.content }}</div></i>
 
+        </div>
         {% endfor %}
-    {% endif %}
-    <a href="/users/{{ user.username }}/notes/add" class="btn btn-primary">Add a Note</a>
+        <br>
+        {% endif %}
+        <a href="/users/{{ user.username }}/notes/add" class="btn btn-primary">Add a Note</a>
     </div>
 
 </div>
 <br>
-<form action="/logout" method="POST" id="log-out" >
+<form action="/logout" method="POST" id="log-out">
     {{ form.hidden_tag() }}
 
     {% for field in form
@@ -41,7 +51,7 @@
     </button>
 </form>
 <br>
-<form action="/users/{{ user.username }}/delete" method="POST" id="delete" >
+<form action="/users/{{ user.username }}/delete" method="POST" id="delete">
     {{ form.hidden_tag() }}
 
     {% for field in form
@@ -52,6 +62,8 @@
         Delete User
     </button>
 </form>
+
+
 
 
 

@@ -8,9 +8,9 @@ import os
 
 app = Flask(__name__)
 
-SECRET_KEY=os.environ['SECRET_KEY'] 
-app.config['SECRET_KEY'] = SECRET_KEY 
-#needed for debug toolbar and session
+SECRET_KEY = os.environ['SECRET_KEY']
+app.config['SECRET_KEY'] = SECRET_KEY
+# needed for debug toolbar and session
 
 toolbar = DebugToolbarExtension(app)
 
@@ -21,13 +21,15 @@ app.config['SQLALCHEMY_ECHO'] = True
 connect_db(app)
 db.create_all()
 
+
 @app.get("/")
 def redirect_to_register():
     """Redirect to /register"""
 
     return redirect("/register")
 
-@app.route("/register", methods=["GET" , "POST"])
+
+@app.route("/register", methods=["GET", "POST"])
 def register_user():
     """ Register user: produce form & handle form submission. """
 
@@ -40,17 +42,19 @@ def register_user():
         first_name = form.first_name.data
         last_name = form.last_name.data
 
-        new_user = User.register(username, password, email, first_name, last_name)
+        new_user = User.register(
+            username, password, email, first_name, last_name)
         db.session.commit()
         flash("User successfully created")
 
         session["username"] = new_user.username
 
         return redirect(f"/users/{new_user.username}")
-    
-    else: 
+
+    else:
 
         return render_template("register_form.html", form=form)
+
 
 @app.route("/login", methods=["GET", "POST"])
 def log_in_user():
@@ -72,8 +76,9 @@ def log_in_user():
 
         else:
             form.username.errors = ["Bad name/password"]
-    
+
     return render_template("login_form.html", form=form)
+
 
 @app.get("/users/<username>")
 def display_user_details(username):
@@ -84,19 +89,21 @@ def display_user_details(username):
         flash("You must be logged in to view!")
         return redirect("/login")
 
-    else: 
+    else:
         user = User.query.get_or_404(username)
 
         form = LogOutForm()
+        delete_note_form = DeleteNoteForm()
 
         if session["username"] == user.username:
-            # breakpoint()
-            return render_template("user_detail.html", user=user, form=form)
-        else: 
+
+            return render_template("user_detail.html", user=user, form=form, delete_note_form=delete_note_form)
+        else:
             flash("You're not authorized to view that page")
             session_user = session["username"]
 
             return redirect(f"/users/{session_user}")
+
 
 @app.post("/logout")
 def log_out_user():
@@ -109,6 +116,7 @@ def log_out_user():
         flash("Successfully logged out")
 
     return redirect("/")
+
 
 @app.post("/users/<username>/delete")
 def delete_user_and_notes(username):
@@ -128,8 +136,9 @@ def delete_user_and_notes(username):
         flash("Successfully deleted user")
 
         return redirect("/")
-    
+
     return redirect("/")
+
 
 @app.route("/users/<username>/notes/add", methods=["GET", "POST"])
 def add_note(username):
@@ -150,9 +159,10 @@ def add_note(username):
         db.session.commit()
 
         flash("Successfully added new note")
-        return redirect (f"/users/{user.username}")
+        return redirect(f"/users/{user.username}")
 
     return render_template("add_note_form.html", form=form)
+
 
 @app.route("/notes/<int:note_id>/update", methods=["GET", "POST"])
 def update_note(note_id):
@@ -165,16 +175,17 @@ def update_note(note_id):
     if form.validate_on_submit():
         title = form.title.data
         content = form.content.data
-        owner = form.owner.data
 
-        update_note = Note(title=title, content=content, owner=owner)
-        db.session.add(update_note)
+        note.title=title
+        note.content=content
+
         db.session.commit()
 
         flash("Successfully updated note")
-        return redirect (f"/users/{user.username}")
+        return redirect(f"/users/{user.username}")
 
     return render_template("edit_note_form.html", form=form)
+
 
 @app.post("/notes/<int:note_id>/delete")
 def delete_note(note_id):
@@ -189,7 +200,6 @@ def delete_note(note_id):
         db.session.commit()
 
         flash("Successfully deleted note")
-        return redirect (f"/users/{username}")
-    
+        return redirect(f"/users/{username}")
+
     return redirect(f"/users/{username}")
-    
