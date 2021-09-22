@@ -62,3 +62,6 @@ class AddOrEditNote(FlaskForm):
                         validators=[InputRequired(),
                         Length(max=20)
                         ])
+
+class DeleteNoteForm(FlaskForm):
+    """ Deletes a note from the database """

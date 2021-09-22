@@ -3,13 +3,14 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, Note, db, connect_db
-from forms import RegisterForm, LogInForm, LogOutForm, DeleteUserForm, AddOrEditNote
+from forms import RegisterForm, LogInForm, LogOutForm, DeleteUserForm, AddOrEditNote, DeleteNoteForm
 import os
 
 app = Flask(__name__)
 
 SECRET_KEY=os.environ['SECRET_KEY'] 
-app.config['SECRET_KEY'] = SECRET_KEY #needed for debug toolbar and session
+app.config['SECRET_KEY'] = SECRET_KEY 
+#needed for debug toolbar and session
 
 toolbar = DebugToolbarExtension(app)
 
@@ -174,3 +175,21 @@ def update_note(note_id):
         return redirect (f"/users/{user.username}")
 
     return render_template("edit_note_form.html", form=form)
+
+@app.post("/notes/<int:note_id>/delete")
+def delete_note(note_id):
+    """ Delete a note and redirect to /users/<username> """
+
+    form = DeleteNoteForm()
+    note = Note.query.get_or_404(note_id)
+    username = note.user.username
+
+    if form.validate_on_submit():
+        db.session.delete(note)
+        db.session.commit()
+
+        flash("Successfully deleted note")
+        return redirect (f"/users/{username}")
+    
+    return redirect(f"/users/{username}")
+    
