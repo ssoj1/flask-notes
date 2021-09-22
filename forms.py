@@ -48,14 +48,14 @@ class LogOutForm(FlaskForm):
 class DeleteUserForm(FlaskForm):
     """ Deletes a user from the database """
 
-class AddNote(FlaskForm):
+class AddOrEditNote(FlaskForm):
     """ Creates a new note """
 
     title = StringField("Title",
                         validators=[InputRequired(),
                         Length(max=100)
                         ])
-    content = StringField("Content",
+    content = TextAreaField("Content",
                         validators=[InputRequired()
                         ])
     owner = HiddenField("Username",

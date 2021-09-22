@@ -8,7 +8,7 @@
     <h2>{{ user.first_name }} {{ user.last_name }}</h2>
     <div>Username: {{ user.username }}</div>
     <div>Email: {{ user.email }}</div>
-
+    <br>
     <h3>Notes</h3>
 
     <div class="note-section">
@@ -16,8 +16,8 @@
         {% for note in user.notes %}
 
             <div>
-                <a href="/notes/{{ note.id }}/update"><i class=“far fa-edit”></i></a>
-                <a href="/notes/{{ note.id }}/delete"><i class=“far fa-trash-alt”></i></a>
+                <a href="/notes/{{ note.id }}/update"><i class="far fa-edit"></i></a>
+                <a href="/notes/{{ note.id }}/delete"><i class="far fa-trash-alt"></i></a>
                 <b>{{ note.title }} </b>
                 <div> {{ note.content }}</div>
             </div>
@@ -28,7 +28,7 @@
     </div>
 
 </div>
-
+<br>
 <form action="/logout" method="POST" id="log-out" >
     {{ form.hidden_tag() }}
 
@@ -40,7 +40,7 @@
         Log Out
     </button>
 </form>
-
+<br>
 <form action="/users/{{ user.username }}/delete" method="POST" id="delete" >
     {{ form.hidden_tag() }}
 

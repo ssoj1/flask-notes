@@ -3,7 +3,7 @@
 from flask import Flask, jsonify, request, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 from models import User, Note, db, connect_db
-from forms import RegisterForm, LogInForm, LogOutForm, DeleteUserForm, AddNote
+from forms import RegisterForm, LogInForm, LogOutForm, DeleteUserForm, AddOrEditNote
 import os
 
 app = Flask(__name__)
@@ -136,7 +136,7 @@ def add_note(username):
         After adding a new note, redirects to users/<username>
     """
     user = User.query.get_or_404(username)
-    form = AddNote(owner=user.username)
+    form = AddOrEditNote(owner=user.username)
     # obj=user
 
     if form.validate_on_submit():
@@ -151,5 +151,26 @@ def add_note(username):
         flash("Successfully added new note")
         return redirect (f"/users/{user.username}")
 
-
     return render_template("add_note_form.html", form=form)
+
+@app.route("/notes/<int:note_id>/update", methods=["GET", "POST"])
+def update_note(note_id):
+    """ Update a note and redirect to /users/username"""
+
+    note = Note.query.get_or_404(note_id)
+    user = note.user
+    form = AddOrEditNote(obj=note)
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        owner = form.owner.data
+
+        update_note = Note(title=title, content=content, owner=owner)
+        db.session.add(update_note)
+        db.session.commit()
+
+        flash("Successfully updated note")
+        return redirect (f"/users/{user.username}")
+
+    return render_template("edit_note_form.html", form=form)
